@@ -20,6 +20,7 @@ function load(value, defaultValue) {
  * @param {PNGImage|Buffer} options.imageB Image object of second image
  * @param {string} options.imageBPath Path to second image
  * @param {string} [options.imageOutputPath=undefined] Path to output image file
+ * @param {boolean}  [options.imageOutputBuffer=undefined] Returns a buffer of the output image in the results object. Only works if imageOutputPath was not specified.
  * @param {int} [options.imageOutputLimit=BlinkDiff.OUTPUT_ALL] Determines when an image output is created
  * @param {string} [options.thresholdType=BlinkDiff.THRESHOLD_PIXEL] Defines the threshold of the comparison
  * @param {int} [options.threshold=500] Threshold limit according to the comparison limit.
@@ -79,6 +80,7 @@ function load(value, defaultValue) {
  * @property {string} _imageBPath
  * @property {PNGImage} _imageOutput
  * @property {string} _imageOutputPath
+ * @property {boolean} _imageOutputBuffer
  * @property {int} _imageOutputLimit
  * @property {string} _thresholdType
  * @property {int} _threshold
@@ -142,6 +144,7 @@ function BlinkDiff (options) {
 
 	this._imageOutput = null;
 	this._imageOutputPath = options.imageOutputPath;
+	this._imageOutputBuffer = options.imageOutputBuffer;
 	this._imageOutputLimit = load(options.imageOutputLimit, BlinkDiff.OUTPUT_ALL);
 
 	// Pixel or Percent
@@ -466,6 +469,11 @@ BlinkDiff.prototype = {
 						fn(undefined, result);
 					}
 				}.bind(this));
+			} else if (this._imageOutputBuffer) {
+				this._imageOutput.toBlob(function (err, blob) {
+					result.buffer = blob;
+					fn(undefined, result);
+				})
 			} else {
 				fn(undefined, result);
 			}
